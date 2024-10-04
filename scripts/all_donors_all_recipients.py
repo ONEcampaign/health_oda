@@ -1,4 +1,6 @@
 import pandas as pd
+
+from scripts import config
 from scripts.bilateral import get_bilateral_health_oda
 
 
@@ -23,7 +25,7 @@ def health_with_and_without_covid(
         .groupby(grouper, observed=True, dropna=False)["value"]
         .sum()
         .reset_index()
-        .assign(indicator="Health ODA")
+        .assign(indicator="Health ODA (including COVID-19)")
     )
 
     health_without_covid = (
@@ -37,7 +39,7 @@ def health_with_and_without_covid(
         .groupby(grouper, observed=True, dropna=False)["value"]
         .sum()
         .reset_index()
-        .assign(indicator="Health ODA (without COVID)")
+        .assign(indicator="Health ODA")
     )
 
     data = pd.concat([health, health_without_covid], ignore_index=True)
@@ -47,4 +49,5 @@ def health_with_and_without_covid(
 
 
 if __name__ == "__main__":
-    df = health_with_and_without_covid()
+    df = health_with_and_without_covid(start_year=2008)
+    df.to_csv(config.Paths.output / "health_constant.csv", index=False)
