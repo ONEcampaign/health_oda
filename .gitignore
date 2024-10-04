@@ -131,3 +131,7 @@ dmypy.json
 
 # Ignore DataSpell
 .idea/
+
+# Ignore raw data files
+*.feather
+*.parquet
