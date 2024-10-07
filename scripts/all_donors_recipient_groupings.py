@@ -24,7 +24,16 @@ def africa_not_africa(df: pd.DataFrame) -> pd.DataFrame:
         from_type="DACCode",
         to_type="continent",
         not_found="",
-        additional_mapping={189: "Africa", 298: "Africa", 270: "Africa"},
+        additional_mapping={
+            189: "Africa",
+            289: "Africa",
+            298: "Africa",
+            270: "Africa",
+            1027: "Africa",
+            1028: "Africa",
+            1029: "Africa",
+            1030: "Africa",
+        },
     )
     africa = (
         df.loc[lambda d: d.continent == "Africa"]
@@ -38,6 +47,44 @@ def africa_not_africa(df: pd.DataFrame) -> pd.DataFrame:
     )
 
     return pd.concat([africa, not_africa], ignore_index=True)
+
+
+def by_regions(df: pd.DataFrame) -> pd.DataFrame:
+    df["recipient"] = convert_id(
+        df.recipient_code,
+        from_type="DACCode",
+        to_type="continent",
+        not_found="Other",
+        additional_mapping={
+            189: "Africa",
+            289: "Africa",
+            298: "Africa",
+            270: "Africa",
+            1027: "Africa",
+            1028: "Africa",
+            1029: "Africa",
+            1030: "Africa",
+            89: "Europe",
+            389: "America",
+            489: "America",
+            498: "America",
+            1031: "America",
+            1032: "America",
+            589: "Asia",
+            619: "Asia",
+            679: "Asia",
+            689: "Asia",
+            789: "Asia",
+            798: "Asia",
+            889: "Oceania",
+            1033: "Oceania",
+            1034: "Oceania",
+            1035: "Oceania",
+        },
+    )
+    data = df.pipe(groupby_excluding, exclude=["recipient_code"])
+
+    return data
 
 
 def low_income_other_income(df: pd.DataFrame) -> pd.DataFrame:
@@ -57,6 +104,14 @@ def low_income_other_income(df: pd.DataFrame) -> pd.DataFrame:
     )
 
     return pd.concat([low_income, other_income], ignore_index=True)
+
+
+def by_income(df: pd.DataFrame) -> pd.DataFrame:
+    df = add_income_grouping(df).rename(columns={"income_level": "recipient"})
+    df.recipient = df.recipient.fillna("Not classified by income level")
+    data = df.pipe(groupby_excluding, exclude=["recipient_code"])
+
+    return data
 
 
 def health_with_and_without_covid(
@@ -100,10 +155,12 @@ def health_with_and_without_covid(
     )
 
     data = pd.concat([health, health_without_covid], ignore_index=True)
+
     regions = africa_not_africa(data.copy())
     income_levels = low_income_other_income(data.copy())
 
     data = pd.concat([regions, income_levels], ignore_index=True)
+
     data = data.pivot(
         index=["year", "recipient"], columns="indicator", values="value"
     ).reset_index()
@@ -113,10 +170,6 @@ def health_with_and_without_covid(
 
 if __name__ == "__main__":
     df = health_with_and_without_covid(start_year=2008)
-    order = {"Africa": 0, "Other regions": 1, "Low income": 2, "Other income levels": 3}
-    df["order"] = df.recipient.map(order)
-    df = df.sort_values(["year", "order"]).drop(columns="order")
-
     df.to_csv(
-        config.Paths.output / "health_by_recipient_groupings_constant.csv", index=False
+        config.Paths.output / "health_by_recipient_income_constant.csv", index=False
     )
