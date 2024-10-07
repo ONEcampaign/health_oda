@@ -127,5 +127,5 @@ if __name__ == "__main__":
         end_year=2022,
         prices="constant",
         base_year=2022,
-        export_by_donor=True,
+        export_by_donor=False,
     )
