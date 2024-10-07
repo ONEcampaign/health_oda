@@ -21,6 +21,7 @@ def get_bilateral_health_oda(
     prices: str = "current",
     base_year: Optional[int] = None,
     exclude_covid: bool = False,
+    additional_groupers: Optional[list[str]] = None,
 ) -> pd.DataFrame:
     """"""
     data = get_health_oda_indicator(
@@ -39,7 +40,9 @@ def get_bilateral_health_oda(
         data = remove_covid_purpose(data)
         data = remove_covid_trust_fund(data)
 
-    grouper = ["year", "indicator", "donor_code", "prices"]
+    grouper = ["year", "indicator", "donor_code", "prices"] + (
+        additional_groupers or []
+    )
 
     if by_recipient:
         grouper.append("recipient_code")
