@@ -36,17 +36,22 @@ def get_imputed_multilateral_health_oda(
     end_year: int = 2023,
     by_recipient: bool = False,
     prices: str = "current",
+    currency: str = "USD",
     base_year: Optional[int] = None,
     exclude_covid: bool = False,
 ) -> pd.DataFrame:
 
     if exclude_covid:
         monkey_patch_read_crs()
+    else:
+        READERS["crs"] = read_crs
+
     data = get_health_oda_indicator(
         indicator="imputed_multi_flow_disbursement_gross",
         start_year=start_year - 2,
         end_year=end_year,
         prices=prices,
+        currency=currency,
         base_year=base_year,
     ).loc[lambda d: d.year >= start_year]
 

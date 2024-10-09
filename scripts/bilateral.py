@@ -19,6 +19,7 @@ def get_bilateral_health_oda(
     end_year: int = 2023,
     by_recipient: bool = False,
     prices: str = "current",
+    currency: str = "USD",
     base_year: Optional[int] = None,
     exclude_covid: bool = False,
     additional_groupers: Optional[list[str]] = None,
@@ -29,6 +30,7 @@ def get_bilateral_health_oda(
         start_year=start_year,
         end_year=end_year,
         prices=prices,
+        currency=currency,
         base_year=base_year,
     )
 

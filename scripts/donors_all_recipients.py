@@ -5,17 +5,11 @@ from scripts import config
 from scripts.bilateral import get_bilateral_health_oda
 from scripts.imputed_multilateral import get_imputed_multilateral_health_oda
 
-# US, EUI, NL, IT, France, Germany for sure. Let's add Canada & UK
-
 DONORS = [
-    302,  # US
-    918,  # EUI
-    7,  # Netherlands
-    6,  # Italy
-    4,  # France
-    5,  # Germany
-    301,  # Canada
-    12,  # UK
+    ([4, 5, 6, 7, 918], "EUR"),
+    ([302], "USD"),
+    ([301], "CAD"),
+    ([12], "GBP"),
 ]
 
 
@@ -23,17 +17,19 @@ def export_total_bi_plus_multi_health_spending(
     donors: list[int] = None,
     start_year: int = 2012,
     end_year: int = 2022,
+    currency: str = "USD",
     prices: str = "constant",
     base_year: int | None = 2022,
     export_by_donor: bool = False,
 ) -> None:
 
-    donors = donors or DONORS
+    donors = donors or [d for d, c in DONORS]
 
     bi_covid = get_bilateral_health_oda(
         start_year=start_year,
         end_year=end_year,
         prices=prices,
+        currency=currency,
         base_year=base_year,
         exclude_covid=False,
     )
@@ -41,6 +37,7 @@ def export_total_bi_plus_multi_health_spending(
         start_year=start_year,
         end_year=end_year,
         prices=prices,
+        currency=currency,
         base_year=base_year,
         exclude_covid=True,
     )
@@ -48,6 +45,7 @@ def export_total_bi_plus_multi_health_spending(
         start_year=start_year,
         end_year=end_year,
         prices=prices,
+        currency=currency,
         base_year=base_year,
         exclude_covid=False,
     )
@@ -55,6 +53,7 @@ def export_total_bi_plus_multi_health_spending(
         start_year=start_year,
         end_year=end_year,
         prices=prices,
+        currency=currency,
         base_year=base_year,
         exclude_covid=True,
     )
@@ -108,9 +107,10 @@ def export_total_bi_plus_multi_health_spending(
     # Export the data
     if export_by_donor:
         for donor in data.donor_name.unique():
-            donor_data = data.loc[lambda d: d.donor_code == donor]
+            donor_data = data.loc[lambda d: d.donor_name == donor]
             donor_data.to_csv(
-                config.Paths.output / f"{donor}_total_health_{prices}.csv", index=False
+                config.Paths.output / f"{donor}_total_health_{prices}_{currency}.csv",
+                index=False,
             )
 
     else:
@@ -121,11 +121,14 @@ def export_total_bi_plus_multi_health_spending(
 
 
 if __name__ == "__main__":
-    export_total_bi_plus_multi_health_spending(
-        donors=DONORS,
-        start_year=2012,
-        end_year=2022,
-        prices="constant",
-        base_year=2022,
-        export_by_donor=False,
-    )
+
+    for donors_, currency_ in DONORS:
+        export_total_bi_plus_multi_health_spending(
+            donors=donors_,
+            start_year=2015,
+            end_year=2022,
+            currency=currency_,
+            prices="constant",
+            base_year=2022,
+            export_by_donor=True,
+        )
