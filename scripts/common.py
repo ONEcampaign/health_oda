@@ -92,9 +92,23 @@ def remap_covid_keyword(df: pd.DataFrame) -> pd.DataFrame:
     return df
 
 
+def flag_covid_keyword(df: pd.DataFrame) -> pd.DataFrame:
+    # Any rows with 'covid' in the keyword column will have their purpose code remapped to 160
+    df["covid_k"] = df.keywords.str.contains("covid", case=False, na=False)
+
+    return df
+
+
 def remap_covid_purpose(df: pd.DataFrame) -> pd.DataFrame:
     # Any rows with purpose code 12264 will have their purpose code remapped to 160
     df.loc[lambda d: d.purpose_code == 12264, "purpose_code"] = 160
+
+    return df
+
+
+def flag_covid_purpose(df: pd.DataFrame) -> pd.DataFrame:
+    # Any rows with purpose code 12264 will have their purpose code remapped to 160
+    df["covid_p"] = df.purpose_code == 12264
 
     return df
 
@@ -106,11 +120,19 @@ def remap_covid_trust_fund(df: pd.DataFrame) -> pd.DataFrame:
     return df
 
 
+def flag_covid_trust_fund(df: pd.DataFrame) -> pd.DataFrame:
+    # Any rows with donor code 1047 will have their donor code remapped to 160
+    df["covid_t"] = df.donor_code == 1047
+
+    return df
+
+
 GROUPER = [
     "year",
     "indicator",
     "donor_code",
     "recipient_code",
+    "project_title",
     "purpose_code",
     "keywords",
     "prices",

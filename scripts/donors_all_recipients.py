@@ -6,10 +6,11 @@ from scripts.bilateral import get_bilateral_health_oda
 from scripts.imputed_multilateral import get_imputed_multilateral_health_oda
 
 DONORS = [
-    ([4, 5, 6, 7, 918], "EUR"),
-    ([302], "USD"),
+    # ([4, 5, 6, 7, 918], "EUR"),
+    # ([302], "USD"),
     ([301], "CAD"),
     ([12], "GBP"),
+    # (918)
 ]
 
 
@@ -32,6 +33,7 @@ def export_total_bi_plus_multi_health_spending(
         currency=currency,
         base_year=base_year,
         exclude_covid=False,
+        additional_groupers=["project_title", "purpose_code"],
     )
     bi = get_bilateral_health_oda(
         start_year=start_year,
@@ -40,6 +42,7 @@ def export_total_bi_plus_multi_health_spending(
         currency=currency,
         base_year=base_year,
         exclude_covid=True,
+        additional_groupers=["project_title", "purpose_code"],
     )
     multi_covid = get_imputed_multilateral_health_oda(
         start_year=start_year,
@@ -122,13 +125,12 @@ def export_total_bi_plus_multi_health_spending(
 
 if __name__ == "__main__":
 
-    for donors_, currency_ in DONORS:
-        export_total_bi_plus_multi_health_spending(
-            donors=donors_,
-            start_year=2015,
-            end_year=2022,
-            currency=currency_,
-            prices="constant",
-            base_year=2022,
-            export_by_donor=True,
-        )
+    export_total_bi_plus_multi_health_spending(
+        donors=[918],
+        start_year=2015,
+        end_year=2022,
+        currency="EUR",
+        prices="constant",
+        base_year=2022,
+        export_by_donor=True,
+    )
