@@ -8,8 +8,8 @@ from scripts.imputed_multilateral import get_imputed_multilateral_health_oda
 DONORS = [
     # ([4, 5, 6, 7, 918], "EUR"),
     # ([302], "USD"),
-    ([301], "CAD"),
-    ([12], "GBP"),
+    # ([301], "CAD"),
+    # ([12], "GBP"),
     # (918)
 ]
 
@@ -126,11 +126,11 @@ def export_total_bi_plus_multi_health_spending(
 if __name__ == "__main__":
 
     export_total_bi_plus_multi_health_spending(
-        donors=[918],
-        start_year=2015,
-        end_year=2022,
-        currency="EUR",
+        donors=[4, 5, 6, 7, 918, 301, 302, 12],
+        start_year=2019,
+        end_year=2023,
+        currency="USD",
         prices="constant",
-        base_year=2022,
-        export_by_donor=True,
+        base_year=2023,
+        export_by_donor=False,
     )
