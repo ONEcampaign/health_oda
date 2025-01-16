@@ -116,9 +116,9 @@ def by_income(df: pd.DataFrame) -> pd.DataFrame:
 
 def health_with_and_without_covid(
     prices: str = "constant",
-    base_year: int = 2022,
+    base_year: int = 2023,
     start_year: int = 2015,
-    end_year: int = 2022,
+    end_year: int = 2023,
 ) -> pd.DataFrame:
 
     grouper = ["year", "recipient_code"]

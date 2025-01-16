@@ -10,6 +10,10 @@ from scripts.common import (
     remap_covid_purpose,
     remap_covid_trust_fund,
     get_health_oda_indicator,
+    flag_covid_keyword,
+    flag_covid_purpose,
+    flag_covid_trust_fund,
+    filter_health_sectors,
 )
 
 set_data_path(config.Paths.raw_data)
@@ -22,6 +26,18 @@ def read_crs_remap_covid(years):
         data.pipe(remap_covid_keyword)
         .pipe(remap_covid_purpose)
         .pipe(remap_covid_trust_fund)
+    )
+
+    return data
+
+
+def read_crs_eui(years):
+    data = read_crs(years)
+
+    data = (
+        data.pipe(flag_covid_keyword)
+        .pipe(flag_covid_purpose)
+        .pipe(flag_covid_trust_fund)
     )
 
     return data
@@ -70,4 +86,9 @@ def get_imputed_multilateral_health_oda(
 
 
 if __name__ == "__main__":
-    df = get_imputed_multilateral_health_oda(2013, 2023, by_recipient=False)
+    df = read_crs_eui(2022)
+    df = df.query("donor_code == 918")
+    df = df.pipe(filter_health_sectors)
+    df["covid"] = df.covid_k | df.covid_p | df.covid_t
+
+    df = df.loc[lambda d: d.covid]
