@@ -6,11 +6,11 @@ from scripts.bilateral import get_bilateral_health_oda
 from scripts.imputed_multilateral import get_imputed_multilateral_health_oda
 
 DONORS = [
-    # ([4, 5, 6, 7, 918], "EUR"),
-    # ([302], "USD"),
-    # ([301], "CAD"),
-    # ([12], "GBP"),
-    # (918)
+    ([4, 5, 6, 7, 918], "EUR"),
+    ([302], "USD"),
+    ([301], "CAD"),
+    ([12], "GBP"),
+    (918)
 ]
 
 
@@ -78,7 +78,13 @@ def export_total_bi_plus_multi_health_spending(
     ).loc[lambda d: d.donor_code.isin(donors)]
 
     # Combine the data
-    data = pd.concat([bilateral, multilateral], ignore_index=True)
+    data = pd.concat(
+        [
+            bilateral,
+            multilateral,
+        ],
+        ignore_index=True,
+    )
 
     # Summarize the data
     data = (
@@ -126,11 +132,11 @@ def export_total_bi_plus_multi_health_spending(
 if __name__ == "__main__":
 
     export_total_bi_plus_multi_health_spending(
-        donors=[4, 5, 6, 7, 918, 301, 302, 12],
-        start_year=2019,
+        donors=[12],
+        start_year=2015,
         end_year=2023,
-        currency="USD",
+        currency="GBP",
         prices="constant",
         base_year=2023,
-        export_by_donor=False,
+        export_by_donor=True,
     )
