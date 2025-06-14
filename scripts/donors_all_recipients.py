@@ -10,7 +10,7 @@ DONORS = [
     ([302], "USD"),
     ([301], "CAD"),
     ([12], "GBP"),
-    (918)
+    (918),
 ]
 
 
@@ -22,6 +22,7 @@ def export_total_bi_plus_multi_health_spending(
     prices: str = "constant",
     base_year: int | None = 2022,
     export_by_donor: bool = False,
+    by_recipient: bool = True,
 ) -> None:
 
     donors = donors or [d for d, c in DONORS]
@@ -33,6 +34,7 @@ def export_total_bi_plus_multi_health_spending(
         currency=currency,
         base_year=base_year,
         exclude_covid=False,
+        by_recipient=by_recipient,
         additional_groupers=["project_title", "purpose_code"],
     )
     bi = get_bilateral_health_oda(
@@ -42,6 +44,7 @@ def export_total_bi_plus_multi_health_spending(
         currency=currency,
         base_year=base_year,
         exclude_covid=True,
+        by_recipient=by_recipient,
         additional_groupers=["project_title", "purpose_code"],
     )
     multi_covid = get_imputed_multilateral_health_oda(
@@ -50,6 +53,7 @@ def export_total_bi_plus_multi_health_spending(
         prices=prices,
         currency=currency,
         base_year=base_year,
+        by_recipient=by_recipient,
         exclude_covid=False,
     )
     multi = get_imputed_multilateral_health_oda(
@@ -58,6 +62,7 @@ def export_total_bi_plus_multi_health_spending(
         prices=prices,
         currency=currency,
         base_year=base_year,
+        by_recipient=by_recipient,
         exclude_covid=True,
     )
 
@@ -89,7 +94,9 @@ def export_total_bi_plus_multi_health_spending(
     # Summarize the data
     data = (
         data.groupby(
-            ["year", "donor_code", "prices", "indicator"], observed=True, dropna=False
+            ["year", "donor_code", "recipient_code", "prices", "indicator"],
+            observed=True,
+            dropna=False,
         )["value"]
         .sum()
         .reset_index()
@@ -97,7 +104,9 @@ def export_total_bi_plus_multi_health_spending(
 
     # Reshape for export
     data = data.pivot(
-        index=["year", "donor_code", "prices"], columns="indicator", values="value"
+        index=["year", "donor_code", "recipient_code", "prices"],
+        columns="indicator",
+        values="value",
     ).reset_index()
 
     # Add donor names
@@ -108,6 +117,7 @@ def export_total_bi_plus_multi_health_spending(
         [
             "year",
             "donor_name",
+            "recipient_code",
             "Health ODA (including COVID-19)",
             "Health ODA",
         ]
@@ -132,11 +142,12 @@ def export_total_bi_plus_multi_health_spending(
 if __name__ == "__main__":
 
     export_total_bi_plus_multi_health_spending(
-        donors=[12],
-        start_year=2015,
+        donors=donor_groupings()["dac_countries"],
+        start_year=2019,
         end_year=2023,
-        currency="GBP",
+        currency="USD",
         prices="constant",
         base_year=2023,
-        export_by_donor=True,
+        by_recipient=True,
+        export_by_donor=False,
     )
