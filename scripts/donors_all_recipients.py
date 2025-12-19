@@ -94,7 +94,7 @@ def export_total_bi_plus_multi_health_spending(
     # Summarize the data
     data = (
         data.groupby(
-            ["year", "donor_code", "recipient_code", "prices", "indicator"],
+            ["year", "donor_code", "prices", "indicator"],
             observed=True,
             dropna=False,
         )["value"]
@@ -104,7 +104,7 @@ def export_total_bi_plus_multi_health_spending(
 
     # Reshape for export
     data = data.pivot(
-        index=["year", "donor_code", "recipient_code", "prices"],
+        index=["year", "donor_code",  "prices"],
         columns="indicator",
         values="value",
     ).reset_index()
@@ -117,7 +117,6 @@ def export_total_bi_plus_multi_health_spending(
         [
             "year",
             "donor_name",
-            "recipient_code",
             "Health ODA (including COVID-19)",
             "Health ODA",
         ]
@@ -134,7 +133,7 @@ def export_total_bi_plus_multi_health_spending(
 
     else:
         data.to_csv(
-            config.Paths.output / "bi_plus_multi_health_spending_multiple_donors.csv",
+            config.Paths.output / "bi_plus_multi_health_spending_covid_non_covid.csv",
             index=False,
         )
 
@@ -143,11 +142,11 @@ if __name__ == "__main__":
 
     export_total_bi_plus_multi_health_spending(
         donors=donor_groupings()["dac_countries"],
-        start_year=2019,
-        end_year=2023,
+        start_year=2018,
+        end_year=2024,
         currency="USD",
         prices="constant",
-        base_year=2023,
-        by_recipient=True,
+        base_year=2024,
+        by_recipient=False,
         export_by_donor=False,
     )

@@ -49,7 +49,7 @@ def monkey_patch_read_crs():
 
 def get_imputed_multilateral_health_oda(
     start_year: int = 2000,
-    end_year: int = 2023,
+    end_year: int = 2024,
     by_recipient: bool = False,
     prices: str = "current",
     currency: str = "USD",
@@ -85,10 +85,59 @@ def get_imputed_multilateral_health_oda(
     return data
 
 
-if __name__ == "__main__":
-    df = read_crs_eui(2022)
-    df = df.query("donor_code == 918")
-    df = df.pipe(filter_covid_sectors)
-    df["covid"] = df.covid_k | df.covid_p | df.covid_t
+def imputed_health_with_and_without_covid(
+    prices: str = "constant",
+    base_year: int = 2024,
+    start_year: int = 2015,
+    end_year: int = 2024,
+) -> pd.DataFrame:
 
-    df = df.loc[lambda d: d.covid]
+    grouper = ["year", "donor_code"]
+
+    # Get the data for health
+    health = (
+        get_imputed_multilateral_health_oda(
+            start_year=start_year,
+            end_year=end_year,
+            prices=prices,
+            base_year=base_year,
+            exclude_covid=False,
+        )
+        .groupby(grouper, observed=True, dropna=False)["value"]
+        .sum()
+        .reset_index()
+        .assign(indicator="Health ODA (including COVID-19)")
+    )
+
+    health_without_covid = (
+        get_imputed_multilateral_health_oda(
+            start_year=start_year,
+            end_year=end_year,
+            prices=prices,
+            base_year=base_year,
+            exclude_covid=True,
+        )
+        .groupby(grouper, observed=True, dropna=False)["value"]
+        .sum()
+        .reset_index()
+        .assign(indicator="Health ODA")
+    )
+
+    data = pd.concat([health, health_without_covid], ignore_index=True)
+
+    data = data.pivot(
+        index=["year", "donor_code"], columns="indicator", values="value"
+    ).reset_index()
+
+    return data
+
+
+if __name__ == "__main__":
+    from oda_data import donor_groupings
+
+    dac = donor_groupings()["dac_countries"]
+    df = imputed_health_with_and_without_covid(
+        start_year=2019, base_year=2024, prices="constant"
+    )
+
+    dac_df = df.loc[lambda d: d.donor_code.isin(list(dac))]

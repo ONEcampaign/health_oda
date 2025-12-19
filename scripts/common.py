@@ -385,3 +385,44 @@ def get_health_oda_indicator(
     df = df.groupby(grouper, dropna=False, observed=True)["value"].sum().reset_index()
 
     return df
+
+
+def get_total_oda_indicator(
+    start_year: int = 2000,
+    end_year: int = 2023,
+    prices: str = "current",
+    currency: str = "USD",
+    base_year: Optional[int] = None,
+) -> pd.DataFrame:
+    # Create an ODAData object
+    oda = ODAData(
+        years=range(start_year, end_year + 1),
+        prices=prices,
+        base_year=base_year,
+        currency=currency,
+    )
+
+    # Load the indicator
+    oda.load_indicator(
+        [
+            "crs_bilateral_flow_disbursement_gross",
+            "imputed_multi_flow_disbursement_gross",
+        ]
+    )
+
+    # Get the data, filtered by health sectors
+    df = oda.get_data().astype({"value": float})
+
+    # Group the data
+    grouper = ["year","donor_code"]
+    df = df.groupby(grouper, dropna=False, observed=True)["value"].sum().reset_index()
+
+    return df
+
+
+if __name__ == "__main__":
+    df = get_total_oda_indicator(start_year=2019, prices="constant", base_year=2023)
+    from oda_data import donor_groupings
+
+    dac = donor_groupings()["dac_countries"]
+    dac_df = df.loc[lambda d: d.donor_code.isin(list(dac))]
